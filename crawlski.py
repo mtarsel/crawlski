@@ -30,8 +30,6 @@ def check_url(raw_url):
       print("no response")
       return False
 
-    print("pinged ook")
-
     return True
 
 def create_spider(raw_url):
@@ -75,8 +73,6 @@ def crawl_url_form_post():
     raw_url = request.form['text']
 
     if check_url(raw_url) is True:
-        print("just checked url -valid")
-        print(raw_url)
         if create_spider(raw_url) is True:
 	       #spider is doneski
            return render_template('index.html', name=raw_url)

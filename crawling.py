@@ -9,7 +9,7 @@ import time
 import urllib.parse
 import os
 
-global filename
+global path
 
 try:
     # Python 3.4.
@@ -24,21 +24,17 @@ LOGGER = logging.getLogger(__name__)
 
 #given a url like http://www.google.com this opens the csv file to write to
 
-def write_output(raw_url):
+def get_domain(full_url):
 
     #Mick - MAKE FILE TO WRITE TO
-    no_ext = raw_url.replace('.com','')
+    no_ext = full_url.replace('.com','')
     domain_name = no_ext.replace('http://www.','')
     #domain_name = no_ext.replace('https://www.','')
 
     #contains hostname.csv like google.csv for google.com
     filename = domain_name +'.csv'
+    global path
     path = './static/csv/' + filename
-    if not os.path.exists(os.path.dirname(path)):
-        os.makedirs(os.path.dirname(path))
-
-    print('done here.')
-    return path
 
 
 def lenient_host(host):
@@ -72,9 +68,11 @@ class Crawler:
                  exclude=None, strict=True,  # What to crawl.
                  max_redirect=10, max_tries=4,  # Per-url limits.
                  max_tasks=10, loop=None):
-        print('roots')
 
-        path = write_output(roots)
+        get_domain(roots)
+
+        if not os.path.exists(os.path.dirname(path)):
+            os.makedirs(os.path.dirname(path))
 
         with open(path, 'w') as temp_file:
             print('writing')
@@ -183,25 +181,16 @@ class Crawler:
                     LOGGER.info('got %r distinct urls from %r',
                                 len(urls), response.url)
 
-
-#                    print("\n " ,response.url)
-#                    print(" had the number of links below ")
- #                   print(len(urls))
- #                   print(" those links are...\n \n")
-
                 for url in urls:
 
-                    #print(url)
                     #if(url.find("/ibm/console/logon.jsp?action=OK"):
                      #   print("There is a login page")
 
                     normalized = urllib.parse.urljoin(response.url, url)
 
-      #              print("Nomalized ")
-      #              print(normalized)
-                    path = write_output(str(normalized))
+#                    path = get_domain(str(normalized))
+
                     with open(path, 'a') as temp_file:
-#                        temp_file = open(filename, 'a')
                         temp_file.write(str(normalized) + ',\n')
                         temp_file.close()
 
@@ -314,9 +303,19 @@ class Crawler:
             max_redirect = self.max_redirect
         LOGGER.debug('adding %r %r', url, max_redirect)
 
-        #Mick - getting a new URL
+        #TODO Mick - getting a new URL
         #print("new url: ")
         #print(url)
+
+#        path = get_domain(url)
+
+#        with open(path, 'w') as temp_file:
+#            print('writing')
+#            temp_file.write('Domain name:')
+#            temp_file.write(url)
+#            temp_file.write('\n \n')
+#            temp_file.close()
+
 
         self.seen_urls.add(url)
         self.q.put_nowait((url, max_redirect))
